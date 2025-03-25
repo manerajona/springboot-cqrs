@@ -6,10 +6,12 @@ import com.github.manerajona.cqrs.domain.entities.Currency;
 import com.github.manerajona.cqrs.domain.entities.Deposit;
 import com.github.manerajona.cqrs.domain.entities.DepositStatus;
 import com.github.manerajona.cqrs.domain.errors.DepositNotFoundException;
+import com.github.manerajona.cqrs.domain.events.DepositCreatedEvent;
 import com.github.manerajona.cqrs.ports.output.mongo.DepositDao;
 import com.github.manerajona.cqrs.ports.output.publisher.DepositEventProducer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -27,13 +29,18 @@ public class DepositAggregate {
         this.defaultCurrency = Currency.valueOf(currency);
     }
 
+    @Transactional
     public UUID handle(CreateDepositCommand command) {
         final Deposit deposit = createDepositCommandToDeposit(command);
         depositDao.save(deposit);
-        depositEventProducer.publish(deposit);
+
+        final DepositCreatedEvent event = depositToDepositCreatedEvent(deposit);
+        depositEventProducer.publish(event);
+
         return deposit.guid();
     }
 
+    @Transactional
     public void handle(UpdateDepositStatusCommand command) throws DepositNotFoundException {
         depositDao.updateStatus(command.guid(), command.status());
     }
@@ -46,6 +53,15 @@ public class DepositAggregate {
                 .amount(command.amount())
                 .currency(defaultCurrency)
                 .status(DepositStatus.PENDING)
+                .build();
+    }
+
+    private DepositCreatedEvent depositToDepositCreatedEvent(Deposit deposit) {
+        return DepositCreatedEvent.builder()
+                .guid(deposit.guid())
+                .accountNumber(deposit.accountNumber())
+                .amount(deposit.amount())
+                .currency(defaultCurrency)
                 .build();
     }
 }

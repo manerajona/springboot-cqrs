@@ -7,7 +7,6 @@ import com.github.manerajona.cqrs.domain.errors.DepositNotFoundException;
 import com.github.manerajona.cqrs.ports.output.mongo.DepositDocument.StatusHistoryEntry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,13 +18,12 @@ public class DepositDao {
 
     private final DepositRepository depositRepository;
 
-    @Transactional
     public void save(Deposit deposit) {
-        final DepositDocument document = mapEntityToDocument(deposit);
-        depositRepository.save(document);
+        Optional.of(deposit)
+                .map(DepositDao::depositToDepositDocument)
+                .ifPresent(depositRepository::save);
     }
 
-    @Transactional
     public void updateStatus(UUID guid, DepositStatus status) throws DepositNotFoundException {
         final DepositDocument document = depositRepository.findById(guid)
                 .orElseThrow(DepositNotFoundException::new)
@@ -35,19 +33,17 @@ public class DepositDao {
         depositRepository.save(document);
     }
 
-    @Transactional(readOnly = true)
     public Optional<Deposit> findByGuid(UUID guid) {
-        return depositRepository.findByGuid(guid).map(DepositDao::mapDocumentToEntity);
+        return depositRepository.findByGuid(guid).map(DepositDao::depositDocumentToDeposit);
     }
 
-    @Transactional(readOnly = true)
     public List<Deposit> findAll() {
         return depositRepository.findAll().stream()
-                .map(DepositDao::mapDocumentToEntity)
+                .map(DepositDao::depositDocumentToDeposit)
                 .toList();
     }
 
-    private static Deposit mapDocumentToEntity(DepositDocument document) {
+    private static Deposit depositDocumentToDeposit(DepositDocument document) {
         final StatusHistoryEntry lastStatusEntry = document.getStatusHistory().getLast();
         return Deposit.builder()
                 .guid(document.getGuid())
@@ -59,7 +55,7 @@ public class DepositDao {
                 .build();
     }
 
-    private static DepositDocument mapEntityToDocument(Deposit deposit) {
+    private static DepositDocument depositToDepositDocument(Deposit deposit) {
         final StatusHistoryEntry statusHistoryEntry = new StatusHistoryEntry(deposit.status().name());
         return DepositDocument.builder()
                 .guid(deposit.guid())
