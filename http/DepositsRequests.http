@@ -1,0 +1,16 @@
+### Create deposit
+POST {{urlDeposits}}
+Content-Type: application/json
+
+{
+  "accountNumber": 122333,
+  "firstName": "Joe",
+  "lastName": "Doe",
+  "amount": 10
+}
+
+### Get all
+GET {{urlDeposits}}
+
+### Get by guid
+GET {{urlDeposits}}/32e5562a-aa2b-40d4-9daa-8542e8fe22db
