@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: springboot-cqrs
+  datasource:
+    url: jdbc:postgresql://localhost:5432/deposit_store
+    username: username
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+  data:
+    mongodb:
+      database: deposit_view
+      port: '27017'
+      host: localhost
+com:
+  github:
+    manerajona:
+      deposits:
+        default-currency: USD
+      redis:
+        pubsub:
+          topic-name: deposit_events
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: debug
+    org.hibernate.SQL: debug

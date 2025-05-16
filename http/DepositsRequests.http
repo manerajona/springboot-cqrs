@@ -1,0 +1,22 @@
+### Create deposit
+POST {{urlDeposits}}
+Content-Type: application/json
+
+{
+  "accountNumber": 122333,
+  "amount": 10.24
+}
+
+### Update deposit status
+PATCH {{urlDeposits}}/eb7c4202-686d-4ab2-afc7-859022323d93
+Content-Type: application/json
+
+{
+  "status": "COMPLETED"
+}
+
+### Get all
+GET {{urlDeposits}}
+
+### Get by guid
+GET {{urlDeposits}}/eb7c4202-686d-4ab2-afc7-859022323d93
