@@ -21,13 +21,18 @@ public class DepositHistoryDao {
     private final DepositHistoryRepository depositRepository;
 
     public void save(Deposit deposit) {
-        Optional.ofNullable(deposit)
-                .map(DepositHistoryDao::depositToDepositDocument)
-                .ifPresent(depositRepository::save);
+        var document = DepositHistoryDoc.builder()
+                .guid(deposit.getId().guid())
+                .accountNumber(deposit.getAccountNumber())
+                .amount(deposit.getMoney().amount())
+                .currency(deposit.getMoney().currency().name())
+                .statusHistoryEntry(new StatusHistoryEntry(deposit.getStatus().name()))
+                .build();
+        depositRepository.save(document);
     }
 
     public void updateStatus(UUID guid, DepositStatus status) throws DepositNotFoundException {
-        final DepositHistoryDoc document = depositRepository.findById(guid)
+        var document = depositRepository.findById(guid)
                 .orElseThrow(DepositNotFoundException::new)
                 .toBuilder()
                 .statusHistoryEntry(new StatusHistoryEntry(status.name()))
@@ -59,17 +64,6 @@ public class DepositHistoryDao {
                 .amount(document.getAmount())
                 .currency(Currency.valueOf(document.getCurrency()))
                 .statusHistory(statusHistory)
-                .build();
-    }
-
-    private static DepositHistoryDoc depositToDepositDocument(Deposit deposit) {
-        var statusHistoryEntry = new StatusHistoryEntry(deposit.status().name());
-        return DepositHistoryDoc.builder()
-                .guid(deposit.id().guid())
-                .accountNumber(deposit.accountNumber())
-                .amount(deposit.money().amount())
-                .currency(deposit.money().currency().name())
-                .statusHistoryEntry(statusHistoryEntry)
                 .build();
     }
 }

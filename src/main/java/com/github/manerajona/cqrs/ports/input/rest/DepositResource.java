@@ -35,7 +35,7 @@ public class DepositResource {
     private final DepositHistoryService depositHistoryService;
 
     @PostMapping
-    ResponseEntity<Void> save(@Valid @RequestBody CreateDepositCommand command) {
+    ResponseEntity<Void> create(@Valid @RequestBody CreateDepositCommand command) {
         DepositId depositId = depositService.handle(command);
         return ResponseEntity.created(URI.create("/deposits/" + depositId.guid())).build();
     }

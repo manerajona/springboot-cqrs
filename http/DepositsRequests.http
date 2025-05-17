@@ -8,7 +8,7 @@ Content-Type: application/json
 }
 
 ### Update deposit status
-PATCH {{urlDeposits}}/eb7c4202-686d-4ab2-afc7-859022323d93
+PATCH {{urlDeposits}}/f6cc63b0-2341-4692-ac12-0fba7582f1a7
 Content-Type: application/json
 
 {
@@ -19,4 +19,4 @@ Content-Type: application/json
 GET {{urlDeposits}}
 
 ### Get by guid
-GET {{urlDeposits}}/eb7c4202-686d-4ab2-afc7-859022323d93
+GET {{urlDeposits}}/f6cc63b0-2341-4692-ac12-0fba7582f1a7

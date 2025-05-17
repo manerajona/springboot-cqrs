@@ -15,12 +15,13 @@ public class DepositDao {
     private final DepositRepository depositRepository;
 
     public void save(Deposit deposit) {
-        var depositJpa = new DepositJpa(
-                deposit.id().guid(),
-                deposit.accountNumber(),
-                deposit.money().amount(),
-                deposit.money().currency(),
-                deposit.status());
+        var depositJpa = DepositJpa.builder()
+                .guid(deposit.getId().guid())
+                .accountNumber(deposit.getAccountNumber())
+                .amount(deposit.getMoney().amount())
+                .currency(deposit.getMoney().currency())
+                .status(deposit.getStatus())
+                .build();
         depositRepository.save(depositJpa);
     }
 

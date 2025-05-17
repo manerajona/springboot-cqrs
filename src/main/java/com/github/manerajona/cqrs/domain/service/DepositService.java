@@ -8,7 +8,6 @@ import com.github.manerajona.cqrs.domain.events.DepositCreatedEvent;
 import com.github.manerajona.cqrs.domain.events.DepositStatusUpdatedEvent;
 import com.github.manerajona.cqrs.domain.vo.Currency;
 import com.github.manerajona.cqrs.domain.vo.DepositId;
-import com.github.manerajona.cqrs.domain.vo.DepositStatus;
 import com.github.manerajona.cqrs.domain.vo.Money;
 import com.github.manerajona.cqrs.ports.output.jpa.DepositDao;
 import com.github.manerajona.cqrs.ports.output.publisher.DepositEventPublisher;
@@ -16,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,17 +26,13 @@ public class DepositService {
 
     @Transactional
     public DepositId handle(CreateDepositCommand command) {
-        var deposit = new Deposit(
-                new DepositId(UUID.randomUUID()),
-                command.accountNumber(),
-                new Money(command.amount(), defaultCurrency),
-                DepositStatus.PENDING);
+        var deposit = new Deposit(command.accountNumber(), new Money(command.amount(), defaultCurrency));
         depositDao.save(deposit);
 
         var event = new DepositCreatedEvent(deposit);
         depositEventPublisher.publish(event);
 
-        return deposit.id();
+        return deposit.getId();
     }
 
     @Transactional
