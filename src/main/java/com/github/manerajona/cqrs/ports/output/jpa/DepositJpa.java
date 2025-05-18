@@ -28,12 +28,14 @@ class DepositJpa {
     private Currency currency;
 
     @With
+    @Column(nullable = false)
     private DepositStatus status;
 
     @Version
     @Column(nullable = false)
     private int version;
 
+    @Builder
     public DepositJpa(UUID guid, int accountNumber, double amount, Currency currency, DepositStatus status) {
         this.guid = guid;
         this.accountNumber = accountNumber;

@@ -1,12 +1,12 @@
-package com.github.manerajona.cqrs.domain.service;
+package com.github.manerajona.cqrs.domain.services;
 
 import com.github.manerajona.cqrs.domain.commands.CreateDepositHistoryCommand;
 import com.github.manerajona.cqrs.domain.commands.UpdateDepositHistoryStatusCommand;
-import com.github.manerajona.cqrs.domain.errors.DepositNotFoundException;
+import com.github.manerajona.cqrs.domain.errors.DomainException;
 import com.github.manerajona.cqrs.domain.projections.DepositProjection;
 import com.github.manerajona.cqrs.domain.queries.FindAllDepositsQuery;
 import com.github.manerajona.cqrs.domain.queries.FindDepositByGuidQuery;
-import com.github.manerajona.cqrs.ports.output.mongo.DepositHistoryDao;
+import com.github.manerajona.cqrs.domain.repositories.DepositHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,26 +17,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepositHistoryService {
 
-    private final DepositHistoryDao depositHistoryDao;
+    private final DepositHistoryRepository depositHistoryRepository;
 
     @Transactional
     public void handle(CreateDepositHistoryCommand command) {
-        depositHistoryDao.save(command.deposit());
+        depositHistoryRepository.save(command.deposit());
     }
 
     @Transactional
-    public void handle(UpdateDepositHistoryStatusCommand command) throws DepositNotFoundException {
-        depositHistoryDao.updateStatus(command.depositId().guid(), command.status());
+    public void handle(UpdateDepositHistoryStatusCommand command) throws DomainException {
+        depositHistoryRepository.putStatus(command.depositId().guid(), command.status());
     }
 
     @Transactional(readOnly = true)
     public List<DepositProjection> handle(FindAllDepositsQuery ignored) {
-        return depositHistoryDao.findAll();
+        return depositHistoryRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public DepositProjection handle(FindDepositByGuidQuery query) throws DepositNotFoundException {
-        return depositHistoryDao.findByGuid(query.depositId().guid()).orElseThrow(DepositNotFoundException::new);
+    public DepositProjection handle(FindDepositByGuidQuery query) throws DomainException {
+        return depositHistoryRepository.findByGuid(query.depositId().guid());
     }
-
 }

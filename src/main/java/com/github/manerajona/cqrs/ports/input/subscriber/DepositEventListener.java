@@ -7,7 +7,7 @@ import com.github.manerajona.cqrs.domain.commands.UpdateDepositHistoryStatusComm
 import com.github.manerajona.cqrs.domain.errors.DepositNotFoundException;
 import com.github.manerajona.cqrs.domain.events.DepositCreatedEvent;
 import com.github.manerajona.cqrs.domain.events.DepositStatusUpdatedEvent;
-import com.github.manerajona.cqrs.domain.service.DepositHistoryService;
+import com.github.manerajona.cqrs.domain.services.DepositHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

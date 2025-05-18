@@ -3,11 +3,12 @@ package com.github.manerajona.cqrs.ports.input.rest;
 import com.github.manerajona.cqrs.domain.commands.CreateDepositCommand;
 import com.github.manerajona.cqrs.domain.commands.UpdateDepositStatusCommand;
 import com.github.manerajona.cqrs.domain.errors.DepositNotFoundException;
+import com.github.manerajona.cqrs.domain.errors.DepositStatusCannotBeUpdatedException;
 import com.github.manerajona.cqrs.domain.projections.DepositProjection;
 import com.github.manerajona.cqrs.domain.queries.FindAllDepositsQuery;
 import com.github.manerajona.cqrs.domain.queries.FindDepositByGuidQuery;
-import com.github.manerajona.cqrs.domain.service.DepositHistoryService;
-import com.github.manerajona.cqrs.domain.service.DepositService;
+import com.github.manerajona.cqrs.domain.services.DepositHistoryService;
+import com.github.manerajona.cqrs.domain.services.DepositService;
 import com.github.manerajona.cqrs.domain.vo.DepositId;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class DepositResource {
     private final DepositHistoryService depositHistoryService;
 
     @PostMapping
-    ResponseEntity<Void> save(@Valid @RequestBody CreateDepositCommand command) {
+    ResponseEntity<Void> create(@Valid @RequestBody CreateDepositCommand command) {
         DepositId depositId = depositService.handle(command);
         return ResponseEntity.created(URI.create("/deposits/" + depositId.guid())).build();
     }
@@ -61,12 +62,18 @@ public class DepositResource {
 
     @ExceptionHandler(value = DepositNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    String handleAggregateNotFoundException(DepositNotFoundException exception) {
+    String handle(DepositNotFoundException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(value = DepositStatusCannotBeUpdatedException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    String handle(DepositStatusCannotBeUpdatedException exception) {
         return exception.getMessage();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException error) {
+    ResponseEntity<Map<String, String>> handle(MethodArgumentNotValidException error) {
         log.error(error.getMessage(), error);
         Map<String, String> errors = error.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
